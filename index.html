@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>CG総合クイズ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    font-family:sans-serif;
+    background:#e9ecef;
+    padding:30px;
+}
+
+h1{
+    font-size:32px;
+    margin-bottom:30px;
+}
+
+.question{
+    background:#f8f9fa;
+    padding:30px;
+    margin-bottom:30px;
+    border-radius:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+.question p{
+    font-size:18px;
+    margin-bottom:20px;
+}
+
+button{
+    display:block;
+    margin:10px 0;
+    padding:10px 15px;
+    width:260px;   /* ← 横幅固定（スクショ風） */
+    font-size:16px;
+    background:#dcdcdc;
+    border:1px solid #bbb;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#cfcfcf;
+}
+
+.correct{
+    background:#b8f5c2 !important;
+    color:#0b5d1e;
+    font-weight:bold;
+}
+
+.wrong{
+    background:#f5b8b8 !important;
+    color:#721c24;
+    font-weight:bold;
+}
+
+#score{
+    font-size:20px;
+    margin-top:20px;
+    font-weight:bold;
+}
+
+/* TOPボタン */
+#topBtn{
+    position:fixed;
+    right:40px;
+    bottom:40px;
+    padding:15px 25px;
+    background:#333;
+    color:white;
+    border:none;
+    border-radius:40px;
+    font-size:16px;
+    box-shadow:0 6px 15px rgba(0,0,0,0.3);
+    cursor:pointer;
+}
+
+#topBtn:hover{
+    background:#555;
+}
+
+/* スマホ対応 */
+@media(max-width:600px){
+    body{ padding:15px; }
+    button{ width:100%; }
+    #topBtn{
+        right:20px;
+        bottom:20px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>CG総合テスト</h1>
+<div id="quiz"></div>
+<div id="score"></div>
+<button id="topBtn">▲ TOP</button>
+
+<script>
+
+// ==============================
+// 問題データ（全問題）
+// ==============================
+
+const quizData = [
+
+{
+q:"光を混ぜて色を作る場合基本になる三つの色のうち最も波長が長い色は何か。",
+options:["A.赤","B.黄","C.青","D.緑","E.紫","F.白","G.黒"],
+answer:0
+},
+
+{
+q:"光を混ぜて色を作る場合基本になる三つの色のうち２番目に長い色は何か",
+options:["A.赤","B.黄","C.青","D.緑","E.紫","F.白","G.黒"],
+answer:3
+},
+
+{
+q:"光を混ぜて色を作る場合基本になる三つの色のうち最も波長が短い色は何か",
+options:["A.赤","B.黄","C.青","D.緑","E.紫","F.白","G.黒"],
+answer:2
+},
+
+{
+q:"光の三原色の３色すべてを最大で混ぜ合わせたときにできる色は何色か",
+options:["A.赤","B.黄","C.青","D.緑","E.紫","F.白","G.黒"],
+answer:5
+},
+
+{
+q:"色を「色の種類、明るさ、鮮やかさ」の三属性で表す方法では、色の種類は何というか",
+options:["A.波長","B.色相","C.明度","D.鮮度","E.彩度","F.輝度"],
+answer:1
+},
+
+{
+q:"色を「色の種類、明るさ、鮮やかさ」の三属性で表す方法では、色の明るさは何というか",
+options:["A.波長","B.色相","C.明度","D.鮮度","E.彩度","F.輝度"],
+answer:2
+},
+
+{
+q:"色を「色の種類、明るさ、鮮やかさ」の三属性で表す方法では、色の鮮やかさは何というか",
+options:["A.波長","B.色相","C.明度","D.鮮度","E.彩度","F.輝度"],
+answer:4
+},
+
+{
+q:"アナログ画像をディジタル画像に変換する処理のうち、画像の位置情報を飛び飛びの値に変換する処理を何というか",
+options:["A.量子化","B.分散化","C.符号化","D.標本化","E.格子化"],
+answer:3
+},
+
+{
+q:"アナログ画像をディジタル画像に変換する処理のうち、画像の濃淡(明るさ)を飛び飛びの値に変換する処理を何というか",
+options:["A.量子化","B.分散化","C.符号化","D.標本化","E.格子化"],
+answer:0
+},
+
+{
+q:"記録できる明るさの範囲を通常より広くした画像を何というか",
+options:["A.CMY画像","B.HIS画像","C.HSV画像","D.HDR画像","E.SML画像","F.RGB画像"],
+answer:3
+}
+,
+
+{
+q:"三次元CGを作成するときは、まず絵の中に出てくる個々の立体を作成して、その形を記録する。この作業を何というか。",
+options:["A.レンダリング","B.モデリング","C.クリッピング","D.ビューポート"],
+answer:1
+},
+
+{
+q:"次にそれらの場景(シーン)内に配置するが、その場景全体の空間を表す座標系を何というか。",
+options:["A.モデリング座標系","B.デバイス座標系","C.ワールド座標系","D.カメラ座標系","E.アイソメ座標系"],
+answer:2
+},
+
+{
+q:"３次元直交座標系で下向きにｘ軸右向きにｙ軸後ろ向きにｚ軸を取るとどんな座標系になるか",
+options:["A.右手系","B.左手系","C.極座標系"],
+answer:0
+},
+
+{
+q:"機何学的変換で変換式が１次元になるような返還を何というか",
+options:["A.アフィン変換","B.アイソメ変換","C.投影変換","D.視野変換","E.基本変換"],
+answer:0
+},
+
+{
+q:"投影の際は投影面内のある範囲だけを描くようにするがこの範囲を何というか",
+options:["A.ビューポート","B.ビューボリューム","C.スキュー","D.クリッピング","E.ウィンドウ"],
+answer:4
+},
+
+{
+q:"ウィンドウの範囲を視点から見た角度を何というか",
+options:["A.入射角","B.画角","C.広角","D.透視角"],
+answer:1
+},
+
+{
+q:"画角の角度を大きくした場合絵の中に表示される各物体の大きさはどうなるか",
+options:["A.大きくなる","B.小さくなる","C.変わらない"],
+answer:1
+},
+
+{
+q:"投影した結果は表示装置上にある範囲内に表示するがこの範囲を何というか",
+options:["A.ビューポート","B.ビューボリューム","C.ウィンドウ","D.クリッピング"],
+answer:0
+},
+
+{
+q:"３次元座標を２次元座標に変換する際に立体上の点と視点を結んだ線を考え投影面との交点を描きとる方法がある。この方法を何というか。",
+options:["A.平行投影","B.直投影","C.斜投影","D.透視投影","E.アフィン変換"],
+answer:3
+},
+
+{
+q:"直方体の三組の平行線のうち一組だけを投影面と平行になるようにおいて視点から見た図を描くと以下のどれになるか",
+options:["A.一点透視","B.二点透視","C.三点透視"],
+answer:1
+}
+,
+
+{
+q:"立体の形を記録する際に立体の輪郭の線だけを記録したものを何というか",
+options:["A.ワイヤフレームモデル","B.サーフェスモデル","C.ソリッドモデル"],
+answer:0
+},
+
+{
+q:"中身の詰まった立体として記録したものは何というか",
+options:["A.ワイヤフレームモデル","B.サーフェスモデル","C.ソリッドモデル"],
+answer:2
+},
+
+{
+q:"ｘ、ｙ、ｚ座標をそれら以外の別の変数を使った式で表して曲線や曲面を表すような方程式の形を何というか",
+options:["A.陰関数形式","B.陽関数形式","C.代数形式","D.パラメータ形式"],
+answer:3
+},
+
+{
+q:"曲線を導く方法の一つとして複数の制御点の位置を指定するだけでなめらかな１本の曲線を導くというものがある。この代表的なものは何か",
+options:["A.円錐曲線","B.代数曲線","C.ベジエ曲線","D.Bスプライン曲線","E.NURBS曲線"],
+answer:2
+},
+
+{
+q:"制御点ごとに重みを付けられるように拡張された曲線として、どんなものがあるか",
+options:["A.円錐曲線","B.代数曲線","C.ベジエ曲線","D.Bスプライン曲線","E.NURBS曲線"],
+answer:4
+},
+
+{
+q:"面が向いている方向を記録するには面の何ベクトルを記録するとよいか",
+options:["A.法線","B.釈線","C.接線","D.投射線"],
+answer:0
+},
+
+{
+q:"立体の形を記録する方法のひとつとして直方体や球などの基本立体を集合演算で組み合わせて表現するという方法は何というか",
+options:["A.境界表現","B.細分割曲面","C.スイープ表現","D.フラクタル","E.メタボール","F.ポリゴン曲面","G.ボクセル表現","H.CSG表現"],
+answer:7
+},
+
+{
+q:"立体の形を記録する方法として多角形平面の集まりで表すという方法があるこれを何というか",
+options:["A.境界表現","B.細分割曲面","C.スイープ表現","D.フラクタル","E.メタボール","F.ポリゴン曲面","G.ボクセル表現","H.CSG表現"],
+answer:5
+},
+
+{
+q:"ポリゴン曲面は単純な多面体から各面の分割を繰り返して自動的に滑らかな曲面を導くというものにすることができるこれをなんというか",
+options:["A.境界表現","B.細分割曲面","C.スイープ表現","D.フラクタル","E.メタボール","F.ポリゴン曲面","G.ボクセル表現","H.CSG表現"],
+answer:1
+},
+
+{
+q:"立体を小さな立方体の集まりで表す表し方を何というか",
+options:["A.境界表現","B.細分割曲面","C.スイープ表現","D.フラクタル","E.メタボール","F.ポリゴン曲面","G.ボクセル表現","H.CSG表現"],
+answer:6
+},
+
+{
+q:"立体をなめらかにつながる球の集まりで表現する方法があるこれを何というか",
+options:["A.境界表現","B.細分割曲面","C.スイープ表現","D.フラクタル","E.メタボール","F.ポリゴン曲面","G.ボクセル表現","H.CSG表現"],
+answer:4
+},
+
+{
+q:"形を記録する際に全体の形状と部分の形状が似ている図形を利用することがある。このような図形を何というか",
+options:["A.境界表現","B.細分割曲面","C.スイープ表現","D.フラクタル","E.メタボール","F.ポリゴン曲面","G.ボクセル表現","H.CSG表現"],
+answer:3
+}
+,
+
+{
+q:"視点から見て隠れた面を消し去る処理の一つに画素ごとに奥行きの値を記録して判定する方法があるこれを何というか",
+options:["A.バックフェースカリング","B.奥行きソート","C.Zバッファ","D.レイトレーシング","E.バウンディングボリューム"],
+answer:2
+},
+
+{
+q:"視点から見て隠れた面を消し去る処理の一つに視点と投影面上の画素を結ぶ線を考えこの直線と各立体との交点を求める方法は",
+options:["A.バックフェースカリング","B.奥行きソート","C.Zバッファ","D.レイトレーシング","E.バウンディングボリューム"],
+answer:3
+},
+
+{
+q:"反射光のうちすべての方向から同じ明るさに見えるような反射を何反射というか",
+options:["A.拡散","B.散乱","C.鏡面","D.減衰","E.環境"],
+answer:0
+},
+
+{
+q:"反射光のうち主に一定方向に向かうような反射を何反射というか",
+options:["A.拡散","B.散乱","C.鏡面","D.減衰","E.環境"],
+answer:2
+},
+
+{
+q:"周囲からくる一様な光を近似したものを何というか",
+options:["A.拡散","B.散乱","C.鏡面","D.減衰","E.環境"],
+answer:4
+},
+
+{
+q:"光が微粒子に当たるとあらゆる方向に光が進むがこれを何光というか",
+options:["A.拡散","B.散乱","C.鏡面","D.減衰","E.環境"],
+answer:1
+},
+
+{
+q:"二種類の「かげ」のうちその物体にできる「かげ」を付ける処理を何というか",
+options:["A.モデリング","B.レンダリング","C.シェーディング","D.シャドウイング","E.レイトレーシング"],
+answer:2
+},
+
+{
+q:"屈折光に関しては何法則を使って光の屈折方向を計算できるか",
+options:["A.入射角余弦","B.逆2乗","C.スネル","D.フォン","E.クック・トランス"],
+answer:2
+},
+
+{
+q:"反射で面の一部がピカッと光る部分ができることがあるがこの部分を何というか",
+options:["A.レイマーチング","B.プリン","C.ハイライト","D.点光源","E.完全鏡面"],
+answer:2
+},
+
+{
+q:"多面体近似された曲面で明るさをなめらかに見えるように表示する処理のうち上問をうまく描ける方法としては何か",
+options:["A.コンスタントシェーディング","B.フォンシェーディング","C.グローシェーディング","D.レイマーチング","E.フレームバッファ"],
+answer:1
+},
+
+{
+q:"光源に大きさがある場合の「かげ」を考える際には完全な「かげ」だけでなく光源の光の一部だけが届くという部分を考える必要があるこれを何というか",
+options:["A.本影","B.半影","C.減衰","D.ハイライト","E.シャドウマップ"],
+answer:1
+},
+
+{
+q:"３次元CGでは立体の曲面上に別に用意した平面画像を貼り付けることがあるこの処理を何というか",
+options:["A.ソリッドテクスチャリング","B.テクスチャマッピング","C.ディスプレイスメントマッピング","D.バンプマッピング","E.フォトンマッピング","F.環境マッピング"],
+answer:1
+},
+
+{
+q:"曲面に偽の法線を貼り付けることで表面を凹凸に見させる処理は何というか",
+options:["A.ソリッドテクスチャリング","B.テクスチャマッピング","C.ディスプレイスメントマッピング","D.バンプマッピング","E.フォトンマッピング","F.環境マッピング"],
+answer:3
+},
+
+{
+q:"よりリアルな描画をするには光源からの直射光だけでなく間接光まで計算するこれを何というか",
+options:["A.大域照明モデル","B.局所照明モデル","C.環境光モデル","D.ソリッドモデル","E.サーフェスモデル"],
+answer:0
+},
+
+{
+q:"三次元空間内の濃度分布などは濃度値を持った小立方体の集まりで表現して描画する方法があるこの描画を何というか",
+options:["A.イメージベースドレンダリング","B.ボリュームレンダリング","C.セルシェーディング","D.フォトリアリスティックレンダリング","E.ノンフォトリアリスティックレンダリング"],
+answer:1
+},
+
+{
+q:"写真のようなCGを目指さないような描画を総称して何というか",
+options:["A.イメージベースドレンダリング","B.ボリュームレンダリング","C.セルシェーディング","D.フォトリアリスティックレンダリング","E.ノンフォトリアリスティックレンダリング"],
+answer:4
+},
+
+{
+q:"アニメーションの作成方法として動きの要所になるコマを先に作成し、その後間を埋める中割りを作成する方法は何か",
+options:["A.ワーピング","B.モーフィング","C.パスアニメーション","D.キーフレーム法","E.自由形状変形","F.オイラー操作"],
+answer:3
+},
+
+{
+q:"二枚の平面画像をもとにこの二枚の間で変身するような動画を作成する手法を何というか",
+options:["A.ワーピング","B.モーフィング","C.パスアニメーション","D.キーフレーム法","E.自由形状変形","F.オイラー操作"],
+answer:1
+},
+
+{
+q:"物体を取り囲むような格子を配置しその格子点の座標を動かすことで内部の物体を変形させる操作を何というか",
+options:["A.ワーピング","B.モーフィング","C.パスアニメーション","D.キーフレーム法","E.自由形状変形","F.オイラー操作"],
+answer:4
+},
+
+{
+q:"画像のデータサイズを減らして記録する際には完全には元に戻せない方式でデータサイズを減らすことがあるこれを何というか",
+options:["A.非圧縮","B.可逆圧縮","C.非可逆圧縮","D.ロスレス圧縮"],
+answer:2
+},
+
+{
+q:"画像を記録する際に線分の端点や曲線の制御点などの座標の集まりで記録する方式を何というか",
+options:["A.ラスタ表現","B.ベクタ表現","C.フォトレタッチ","D.ジャギー","E.エイリアシング","F.アンチエイリアシング"],
+answer:1
+},
+
+{
+q:"画像を記録する際に画素ごとの画素値として記録する方式を何というか",
+options:["A.ラスタ表現","B.ベクタ表現","C.フォトレタッチ","D.ジャギー","E.エイリアシング","F.アンチエイリアシング"],
+answer:0
+},
+
+{
+q:"線分などを画素の集まりにする場合は斜め線などがガタガタになってしまうような障害があらわれることがあるがこれを目立たなくさせる処理を何というか",
+options:["A.ラスタ表現","B.ベクタ表現","C.フォトレタッチ","D.ジャギー","E.エイリアシング","F.アンチエイリアシング"],
+answer:5
+},
+
+{
+q:"キャラクタにポーズを付けるときに手先足先などの末端の位置を指定し、これをもとに各関節位置などを自動計算させる方法があるこれを何というか",
+options:["A.フォワードキネマティクス","B.インバースキネマティクス","C.モーションキャプチャ","D.モーションブレンド","E.キーフレーム法","F.パスアニメーション"],
+answer:1
+},
+
+{
+q:"キャラクタにポーズを付けるとき一つ一つの関節角度をそれぞれ指定していく方法を何というか",
+options:["A.フォワードキネマティクス","B.インバースキネマティクス","C.モーションキャプチャ","D.モーションブレンド","E.キーフレーム法","F.パスアニメーション"],
+answer:0
+},
+
+{
+q:"キャラクタにポーズを付けるとき実際の人間の動きを取り込んでそのデータをもとにキャラクタを動かす方法があるが、この動きデータの取り込みを何というか",
+options:["A.フォワードキネマティクス","B.インバースキネマティクス","C.モーションキャプチャ","D.モーションブレンド","E.キーフレーム法","F.パスアニメーション"],
+answer:2
+},
+
+{
+q:"画像を機何学的変換する際に画素と画素の間の位置から色を取る処理が必要になることがある。この時座標を四捨五入した位置の色を取る方法は何というか",
+options:["A.バイリニア","B.プログレッシブ","C.ニアレストネイバー","D.イメージモザイキング","E.インタース","F.バイキュービッグ"],
+answer:2
+},
+
+{
+q:"画像を機何学的変換する際に画素と画素の間の位置から色を取る処理で間が直線的に変化しているとみなして周囲4画素から間の色を求める方法を何補間というか",
+options:["A.バイリニア","B.プログレッシブ","C.ニアレストネイバー","D.イメージモザイキング","E.インタース","F.バイキュービッグ"],
+answer:0
+},
+
+{
+q:"映像信号で走査線を1行飛ばしで走査し、上から下まで2回走査することで1画面分になるという方式を何走査というか",
+options:["A.バイリニア","B.プログレッシブ","C.ニアレストネイバー","D.イメージモザイキング","E.インタース","F.バイキュービッグ"],
+answer:4
+},
+
+{
+q:"映像信号で走査線を飛ばさずに順番に走査する方式を何走査というか",
+options:["A.バイリニア","B.プログレッシブ","C.ニアレストネイバー","D.イメージモザイキング","E.インタース","F.バイキュービッグ"],
+answer:1
+},
+
+{
+q:"複数枚の画像をつなぎ合わせて一枚の大きな画像を作る処理を何というか",
+options:["A.バイリニア","B.プログレッシブ","C.ニアレストネイバー","D.イメージモザイキング","E.インタース","F.バイキュービッグ"],
+answer:3
+},
+
+{
+q:"画像中に各画素値がそれぞれ何個ずつあるのかを表すグラフを何というか",
+options:["A.トーンカーブ","B.コントラスト","C.ガンマ","D.ヒストグラム","E.メディアン","F.ソラリゼーション"],
+answer:3
+},
+
+{
+q:"画像内の明るいところと暗いところの差の激しさを何というか",
+options:["A.トーンカーブ","B.コントラスト","C.ガンマ","D.ヒストグラム","E.メディアン","F.ソラリゼーション"],
+answer:1
+},
+
+{
+q:"変換前の画素値を横軸、変換後の画素値を縦軸にしてグラフの形を指定することで濃淡を変換する手法がある。これを何というか",
+options:["A.トーンカーブ","B.コントラスト","C.ガンマ","D.ヒストグラム","E.メディアン","F.ソラリゼーション"],
+answer:0
+},
+
+{
+q:"トーンカーブのグラフを階段状に指定すると画像の色数を減らすことができるがこの処理を何というか",
+options:["A.ソラリゼーション","B.ポスタリゼーション","C.アンチエイリアジング","D.ネガポジ反転","E.ガンマ変換","F.HSI変換"],
+answer:1
+},
+
+{
+q:"明るさを定数乗することで、白や黒の明るさは変えずに中間調の明るさを上げ下げすることができるがこの処理を何というか",
+options:["A.ソラリゼーション","B.ポスタリゼーション","C.アンチエイリアジング","D.ネガポジ反転","E.ガンマ変換","F.HSI変換"],
+answer:4
+}
+
+
+];
+
+
+// ==============================
+// クイズ生成
+// ==============================
+
+let score = 0;
+let wrongQuestions = [];
+
+shuffle(quizData);
+
+const quizDiv = document.getElementById("quiz");
+
+quizData.forEach((item,index)=>{
+
+    const div = document.createElement("div");
+    div.className = "question";
+    div.innerHTML = "<p>"+(index+1)+". "+item.q+"</p>";
+
+    item.options.forEach((opt,i)=>{
+
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+
+        btn.onclick = ()=>{
+
+            const result = document.createElement("p");
+
+            if(i === item.answer){
+                btn.classList.add("correct");
+                result.textContent = "正解！";
+                result.className = "correct";
+                score++;
+            }else{
+                btn.classList.add("wrong");
+                result.textContent = "不正解！ 正解は → " + item.options[item.answer];
+                result.className = "wrong";
+
+                if(!wrongQuestions.includes(item)){
+                    wrongQuestions.push(item);
+                }
+            }
+
+            div.appendChild(result);
+
+            Array.from(div.getElementsByTagName("button"))
+                 .forEach(b => b.disabled = true);
+
+            document.getElementById("score").textContent =
+                "現在のスコア: " + score + " / " + quizData.length;
+
+            checkFinish();
+        };
+
+        div.appendChild(btn);
+    });
+
+    quizDiv.appendChild(div);
+});
+
+function shuffle(array){
+    for(let i = array.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+
+function checkFinish(){
+
+    const answered =
+        document.querySelectorAll(".question p.correct, .question p.wrong").length;
+
+    if(answered === quizData.length){
+
+        if(document.getElementById("retryBtn")) return;
+
+        const retryBtn = document.createElement("button");
+        retryBtn.id = "retryBtn";
+        retryBtn.textContent = "間違えた問題をもう一度解く";
+        retryBtn.style.marginTop = "20px";
+        retryBtn.onclick = retryWrong;
+
+        document.getElementById("score").appendChild(document.createElement("br"));
+        document.getElementById("score").appendChild(retryBtn);
+    }
+}
+
+function retryWrong(){
+
+    if(wrongQuestions.length === 0){
+        alert("全問正解です！");
+        return;
+    }
+
+    quizDiv.innerHTML = "";
+    document.getElementById("score").textContent = "";
+    score = 0;
+
+    const retryData = [...wrongQuestions];
+    wrongQuestions = [];
+
+    retryData.forEach((item,index)=>{
+
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = "<p>"+(index+1)+". "+item.q+"</p>";
+
+        item.options.forEach((opt,i)=>{
+
+            const btn = document.createElement("button");
+            btn.textContent = opt;
+
+            btn.onclick = ()=>{
+
+                const result = document.createElement("p");
+
+                if(i === item.answer){
+                    btn.classList.add("correct");
+                    result.textContent = "正解！";
+                    result.className = "correct";
+                    score++;
+                }else{
+                    btn.classList.add("wrong");
+                    result.textContent = "不正解！ 正解は → " + item.options[item.answer];
+                    result.className = "wrong";
+                }
+
+                div.appendChild(result);
+
+                Array.from(div.getElementsByTagName("button"))
+                     .forEach(b => b.disabled = true);
+
+                document.getElementById("score").textContent =
+                    "再挑戦スコア: " + score + " / " + retryData.length;
+            };
+
+            div.appendChild(btn);
+        });
+
+        quizDiv.appendChild(div);
+    });
+}
+
+document.getElementById("topBtn").onclick = function(){
+    window.scrollTo({ top:0, behavior:"smooth" });
+};
+
+</script>
+</body>
+</html>
